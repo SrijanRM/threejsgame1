@@ -39,6 +39,8 @@ class Box extends THREE.Mesh {
     update(group) {
         this.bottom = this.position.y - this.height / 2
         this.top = this.position.y + this.height / 2
+        this.position.x += this.velocity.x
+        this.position.z += this.velocity.z
         this.applyGravity()
 
     }
@@ -75,9 +77,74 @@ scene.add(light)
 
 camera.position.z = 5
 
+const keys = {
+    a: {
+        pressed: false
+    },
+    d: {
+        pressed: false
+    },
+    w: {
+        pressed: false
+    },
+    s: {
+        pressed: false
+    }
+}
+
+window.addEventListener('keydown', (event) => {
+    // console.log(event)
+    switch (event.code) {
+        case 'KeyA':
+            keys.a.pressed = true
+            break
+        case 'KeyD':
+            keys.d.pressed = true
+            break
+        case 'KeyW':
+            keys.w.pressed = true
+            break
+        case 'KeyS':
+            keys.s.pressed = true
+            break
+    }
+})
+
+window.addEventListener('keyup', (event) => {
+    // console.log(event)
+    switch (event.code) {
+        case 'KeyA':
+            keys.a.pressed = false
+            break
+        case 'KeyD':
+            keys.d.pressed = false
+            break
+        case 'KeyW':
+            keys.w.pressed = false
+            break
+        case 'KeyS':
+            keys.s.pressed = false
+            break
+    }
+})
+
 function animate() {
     requestAnimationFrame(animate)
     renderer.render(scene, camera)
+    // movement
+    cube.velocity.x = 0
+    cube.velocity.z = 0
+    if (keys.a.pressed) {
+        cube.velocity.x = -0.01
+    } else if (keys.d.pressed) {
+        cube.velocity.x = 0.01
+    }
+
+    if (keys.w.pressed) {
+        cube.velocity.z = -0.01
+    } else if (keys.s.pressed) {
+        cube.velocity.z = 0.01
+    }
     cube.update(ground);
 }
 animate()
