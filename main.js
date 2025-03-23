@@ -162,11 +162,11 @@ window.addEventListener('keyup', (event) => {
     }
 })
 
-const enemyCube = new Box({ width: 1, height: 1, depth: 1, position: { x: 0, y: 0, z: -4 }, velocity: { x: 0, y: -0.01, z: 0.005 }, color: 'red', zAcceleration: true })
-enemyCube.castShadow = true
-scene.add(enemyCube)
-const enemies = [enemyCube]
 
+const enemies = []
+
+let frames = 0;
+let spawnRate = 200
 function animate() {
     const animationid = requestAnimationFrame(animate)
     renderer.render(scene, camera)
@@ -192,5 +192,16 @@ function animate() {
             window.cancelAnimationFrame(animationid);
         }
     })
+
+    if (frames % spawnRate === 0) {
+
+        if (spawnRate > 20) spawnRate -= 20
+
+        const enemyCube = new Box({ width: 1, height: 1, depth: 1, position: { x: (Math.random() - 0.5) * 5, y: 0, z: -4 }, velocity: { x: 0, y: -0.01, z: 0.005 }, color: 'red', zAcceleration: true })
+        enemyCube.castShadow = true
+        scene.add(enemyCube)
+        enemies.push(enemyCube)
+    }
+    frames++;
 }
 animate()
