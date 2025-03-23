@@ -20,7 +20,7 @@ const controls = new OrbitControls(camera, renderer.domElement)
 
 class Box extends THREE.Mesh {
     constructor({
-        width, height, depth, color = '#00ff00', velocity = { x: 0, y: 0, z: 0 }, position = { x: 0, y: 0, z: 0 }
+        width, height, depth, color = '#00ff00', velocity = { x: 0, y: 0, z: 0 }, position = { x: 0, y: 0, z: 0 }, zAcceleration = false
     }) {
         super(new THREE.BoxGeometry(width, height, depth), new THREE.MeshStandardMaterial({ color }))
         this.width = width
@@ -39,6 +39,8 @@ class Box extends THREE.Mesh {
 
         this.velocity = velocity
         this.gravity = -0.005;
+
+        this.zAcceleration = zAcceleration
     }
 
     updateSides() {
@@ -54,6 +56,9 @@ class Box extends THREE.Mesh {
 
     update(ground) {
         this.updateSides();
+        if (this.zAcceleration) {
+            this.velocity.z += 0.001
+        }
         this.position.x += this.velocity.x
         this.position.z += this.velocity.z
         this.applyGravity(ground)
@@ -157,8 +162,13 @@ window.addEventListener('keyup', (event) => {
     }
 })
 
+const enemyCube = new Box({ width: 1, height: 1, depth: 1, position: { x: 0, y: 0, z: -4 }, velocity: { x: 0, y: -0.01, z: 0.005 }, color: 'red', zAcceleration: true })
+enemyCube.castShadow = true
+scene.add(enemyCube)
+const enemies = [enemyCube]
+
 function animate() {
-    requestAnimationFrame(animate)
+    const animationid = requestAnimationFrame(animate)
     renderer.render(scene, camera)
     // movement
     cube.velocity.x = 0
@@ -175,5 +185,12 @@ function animate() {
         cube.velocity.z = 0.05
     }
     cube.update(ground);
+    enemies.forEach(enemy => {
+        enemy.update(ground)
+        if (boxCollision({ box1: cube, box2: enemy })) {
+            console.log("game over")
+            window.cancelAnimationFrame(animationid);
+        }
+    })
 }
 animate()
