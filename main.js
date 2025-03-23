@@ -29,6 +29,11 @@ class Box extends THREE.Mesh {
 
         this.position.set(position.x, position.y, position.z)
 
+        this.right = this.position.x + this.width / 2;
+        this.left = this.position.x - this.width / 2;
+        this.front = this.position.z + this.depth / 2;
+        this.back = this.position.z - this.depth / 2;
+
         this.bottom = this.position.y - this.height / 2
         this.top = this.position.y + this.height / 2
 
@@ -36,19 +41,31 @@ class Box extends THREE.Mesh {
         this.gravity = -0.005;
     }
 
-    update(group) {
+    updateSides() {
+        this.right = this.position.x + this.width / 2;
+        this.left = this.position.x - this.width / 2;
+
+        this.front = this.position.z + this.depth / 2;
+        this.back = this.position.z - this.depth / 2;
+
         this.bottom = this.position.y - this.height / 2
         this.top = this.position.y + this.height / 2
+    }
+
+    update(ground) {
+        this.updateSides();
         this.position.x += this.velocity.x
         this.position.z += this.velocity.z
-        this.applyGravity()
+        this.applyGravity(ground)
 
     }
-    applyGravity() {
-        this.velocity.y += this.gravity
 
+    applyGravity(ground) {
+        this.velocity.y += this.gravity
         // this is whrere we hit grouund 
-        if (this.bottom + this.velocity.y <= ground.top) {
+        if (boxCollision({
+            box1: this, box2: ground
+        })) {
             this.velocity.y *= 0.8
             this.velocity.y = -this.velocity.y
         }
@@ -56,6 +73,18 @@ class Box extends THREE.Mesh {
             this.position.y += this.velocity.y
         }
     }
+}
+
+function boxCollision({
+    box1, box2
+}) {
+    // detect collision 
+    const zCollision = box1.front >= box2.back && box1.back <= box2.front;
+    const xCollision = box1.right >= box2.left && box1.left <= box2.right;
+    const yCollision = box1.bottom + box1.velocity.y <= box2.top && box1.top >= box2.bottom;
+
+    return zCollision && xCollision && yCollision
+
 }
 
 
@@ -135,15 +164,15 @@ function animate() {
     cube.velocity.x = 0
     cube.velocity.z = 0
     if (keys.a.pressed) {
-        cube.velocity.x = -0.01
+        cube.velocity.x = -0.05
     } else if (keys.d.pressed) {
-        cube.velocity.x = 0.01
+        cube.velocity.x = 0.05
     }
 
     if (keys.w.pressed) {
-        cube.velocity.z = -0.01
+        cube.velocity.z = -0.05
     } else if (keys.s.pressed) {
-        cube.velocity.z = 0.01
+        cube.velocity.z = 0.05
     }
     cube.update(ground);
 }
